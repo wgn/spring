@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<context:annotation-config />
+	<context:component-scan  base-package="com.zhuani21.spring"/>
+	<!-- <aop:aspectj-autoproxy /> -->
+	<!-- <bean id="logInterceptor" class="com.zhuani21.spring.aop.LogInterceptor"/> -->
+	<aop:config>
+		<aop:pointcut expression="execution(public * com.zhuani21.spring.dao..*.*(..))" id="daoAop"/>
+		<aop:pointcut expression="execution(public * com.zhuani21.spring.service..*.*(..))" id="serviceAop"/>
+		<aop:aspect ref="logInterceptor" id="logAspect">
+			<aop:before method="before" pointcut-ref="daoAop"/>
+			<aop:around method="after" pointcut-ref="serviceAop"/>
+		</aop:aspect>
+	</aop:config>
+	
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+	    <property name="url" value="${jdbc.url}"/>
+	    <property name="username" value="${jdbc.username}"/>
+	    <property name="password" value="${jdbc.password}"/>
+	</bean>
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="annotatedClasses">
+            <list>
+                <value>com.zhuani21.spring.model.Product</value>
+                <value>com.zhuani21.spring.model.Log</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <value>
+                hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
+                hibernate.showSql=true
+            </value>
+        </property>
+    </bean>
+    <bean id="transactionManager"
+            class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+
+<context:property-placeholder location="jdbc.properties"/>
+
+</beans>

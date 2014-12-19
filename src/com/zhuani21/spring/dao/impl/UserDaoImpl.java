@@ -1,11 +1,9 @@
 package com.zhuani21.spring.dao.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
 import com.zhuani21.spring.dao.UserDao;
@@ -13,19 +11,12 @@ import com.zhuani21.spring.model.User;
 @Repository("userDao")
 public class UserDaoImpl implements UserDao {
 	@Resource
-	private DataSource dataSource;
+	private SessionFactory sessionFactory;
 	public boolean add(User u) {
-		try {
-			Connection conn = dataSource.getConnection();
-			conn.createStatement().executeUpdate("insert into user values (null,'zhangsan','1234')");
-			conn.close();
-			System.out.println("insert into user runned");
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("UserDaoImpl add runed");
-		return false;
+		
+		Session session = sessionFactory.getCurrentSession();
+		session.save(u);
+		return true;
 	}
 
 	public boolean find(String username, String password) {

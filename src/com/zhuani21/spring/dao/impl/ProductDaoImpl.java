@@ -28,4 +28,12 @@ public class ProductDaoImpl implements ProductDao {
 		session.save(p);
 	}
 
+	public Product find(int id) {
+		Session session = sessionFactory.getCurrentSession();
+		Product p = (Product) session.get(Product.class, id);
+		System.out.println(p.getProductName());
+		p.setProductName("小x果");
+		return p;
+	}
+
 }

@@ -31,12 +31,27 @@ public class ProductServiceImpl implements ProductService {
 		this.productDao = productDao;
 	}
 
-	@Transactional(propagation=Propagation.REQUIRED)
+	@Transactional
 	public void add(Product p) {
 		productDao.add(p);
 		Log log = new Log();
 		log.setMsg("一件产品被保存，产品id：" + p.getId());
 		logDao.add(log);
+	}
+	@Transactional(readOnly=true)
+	public Product find(int id){
+		Product p = productDao.find(id);
+		System.out.println(p.getProductName());
+		return p;
+	}
+	//这两个没有注解的方法都会报错，因为dao中使用了getCurrentSession，而内部调用没有启动事务
+	//导致session没有创建，因为内部调用将导致AOP失效，所以事务也就是失效了。
+	//比如，AOP拦截所有service的方法，那么调用这个类的时候，AOP的代码走一遍，但是这个类再调用内部的其他方法，则AOP不会再执行。
+	public void save(Product p){
+		this.add(p);
+	}
+	public Product get(int id){
+		return this.find(id);
 	}
 
 }

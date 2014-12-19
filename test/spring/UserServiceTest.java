@@ -16,7 +16,10 @@ public class UserServiceTest {
 
 		ClassPathXmlApplicationContext act = new ClassPathXmlApplicationContext("beans.xml");
 		UserService userService = (UserService) act.getBean("userService");
-		userService.add(new User());
+		User u = new User();
+		u.setUsername("admin");
+		u.setPassword("1234");
+		userService.add(u);
 		
 		act.destroy();
 	}

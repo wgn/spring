@@ -10,13 +10,22 @@ import com.zhuani21.spring.service.ProductService;
 public class ProductServiceTest {
 
 	@Test
-	public void test() {
+	public void testAdd() {
 		ApplicationContext act = new ClassPathXmlApplicationContext("beans.xml");
 		ProductService productService = (ProductService) act
 				.getBean("productService");
 		Product p = new Product();
-		p.setProductName("香奈儿");
+		p.setProductName("香奈儿1");
 		p.setPrice(9.9f);
-		productService.add(p);
+		productService.save(p);
 	}
-} 
+
+	@Test
+	public void testFind() {
+		ApplicationContext act = new ClassPathXmlApplicationContext("beans.xml");
+		ProductService productService = (ProductService) act
+				.getBean("productService");
+		Product p = productService.find(1);
+		System.out.println(p.getProductName());
+	}
+}

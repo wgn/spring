@@ -16,14 +16,19 @@
 	<context:annotation-config />
 	<context:component-scan  base-package="com.zhuani21.spring"/>
 	<!-- <aop:aspectj-autoproxy /> -->
-	<!-- <bean id="logInterceptor" class="com.zhuani21.spring.aop.LogInterceptor"/> -->
+	<bean id="logInterceptor" class="com.zhuani21.spring.aop.LogInterceptor"/> 
+	<bean id="costTimeInterceptor" class="com.zhuani21.spring.aop.CostTimeInterceptor"/>
 	<aop:config>
 		<aop:pointcut expression="execution(public * com.zhuani21.spring.dao..*.*(..))" id="daoAop"/>
 		<aop:pointcut expression="execution(public * com.zhuani21.spring.service..*.*(..))" id="serviceAop"/>
-		<aop:aspect ref="logInterceptor" id="logAspect">
+		<!-- <aop:aspect ref="logInterceptor" id="logAspect" order="11">
 			<aop:before method="before" pointcut-ref="daoAop"/>
 			<aop:around method="after" pointcut-ref="serviceAop"/>
-		</aop:aspect>
+		</aop:aspect> -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="serviceAop" />
+		<!-- <aop:aspect ref="costTimeInterceptor" id="costTimeAspect" order="1" >
+			<aop:around method="printCostTime" pointcut-ref="serviceAop"/>
+		</aop:aspect> -->
 	</aop:config>
 	
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
@@ -34,11 +39,18 @@
 	</bean>
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="annotatedClasses">
+       <!--  <property name="annotatedClasses">
             <list>
                 <value>com.zhuani21.spring.model.Product</value>
                 <value>com.zhuani21.spring.model.Log</value>
+                <value>com.zhuani21.spring.model.User</value>
             </list>
+        </property> -->
+        
+        <property name="packagesToScan">
+        	<list>
+        		<value>com.zhuani21.spring.model</value>
+        	</list>
         </property>
         <property name="hibernateProperties">
             <value>
@@ -51,8 +63,13 @@
             class="org.springframework.orm.hibernate3.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
-    
-    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+    	<tx:attributes>
+    		<tx:method name="query*" read-only="true"/>
+    		<tx:method name="*"/>
+    	</tx:attributes>
+    </tx:advice>
+    <!-- <tx:annotation-driven transaction-manager="transactionManager" order="1" /> -->
 
 <context:property-placeholder location="jdbc.properties"/>
 
